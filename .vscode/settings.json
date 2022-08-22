@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "crc32.h": "c",
+        "stdint.h": "c",
+        "stdint-gcc.h": "c",
+        "ledstripe.h": "c"
+    }
+}
