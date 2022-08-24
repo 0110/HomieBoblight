@@ -37,7 +37,7 @@
 /******************************************************************************
  *                            LOCAL VARIABLES
 ******************************************************************************/
-
+bool mConfigured = false;
 
 /******************************************************************************
  *                            LOCAL FUNCTIONS
@@ -50,19 +50,23 @@
 
 void setup() {
   Serial.begin(115200);
-  //Serial.setTimeout(1000); // Set timeout of 1 second
-  Homie_setFirmware(HOMIE_FIRMWARE_NAME, "1.1.0");
+  Homie_setFirmware(HOMIE_FIRMWARE_NAME, "1.0.0");
   
   Homie.setup();
   
-  bool mConfigured = Homie.isConfigured();
+  mConfigured = Homie.isConfigured();
   if (!mConfigured) {
     Serial << "Not configured" << endl;
   } else {
-    
+    ledstripe_init(D4 /* GPIO2 */);
+    boblight_init(); 
   }
 }
 
 void loop() {
   Homie.loop();
+  if (mConfigured) {
+    boblight_loop();
+    ledstripe_show();
+  }
 }

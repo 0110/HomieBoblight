@@ -71,6 +71,8 @@ static uint32_t meanBlue = 0;
 static uint32_t oldCRCvalue         = 0U;
 static uint32_t sameColorCounter    = 0U;
 
+static char textbuffer[TEXTLINE_MAX_LENGTH];
+
 /******************************************************************************
  * LOCAL FUNCTIONS for this module
  ******************************************************************************/
@@ -203,22 +205,21 @@ static int readDirectWS2812cmd(char *textbuffer)
 void boblight_init(void)
 {
 	/* Say hello to the host */
-	printf("Ada\n");
+	Serial.print("Ada\n");
+	memset(textbuffer, 0, TEXTLINE_MAX_LENGTH);
 }
 
 int boblight_loop(void)
 {
 	long time = millis();
-	//FIXME read serial input
-	//textbuffer
+	//read serial input
+	readDirectWS2812cmd(textbuffer);
 
 	/* Send ACK to host each second */
 	if ((time + 1000) < millis())
 	{
-	Serial.print("Ada\n");
-
-	time = millis();
-
+		Serial.print("Ada\n");
+		time = millis();
 	}
 
 	return TRUE;
