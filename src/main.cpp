@@ -51,13 +51,14 @@ bool mConfigured = false;
 void setup() {
   Serial.begin(115200);
   Homie_setFirmware(HOMIE_FIRMWARE_NAME, "1.0.0");
-  
   Homie.setup();
   
   mConfigured = Homie.isConfigured();
   if (!mConfigured) {
-    Serial << "Not configured" << endl;
+    Serial.println("Not configured");
+    Serial.flush();
   } else {
+    Serial.println("Start LED");
     ledstripe_init(D4 /* GPIO2 */);
     boblight_init(); 
   }
