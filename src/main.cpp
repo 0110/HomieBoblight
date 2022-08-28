@@ -112,7 +112,7 @@ bool switchHandler(const HomieRange& range, const String& value) {
 
 void setup() {
   Serial.begin(115200);
-  Homie_setFirmware(HOMIE_FIRMWARE_NAME, "1.0.0");
+  Homie_setFirmware(HOMIE_FIRMWARE_NAME, "1.1.0");
   Homie.setLoopFunction(loopHandler);
   Homie.onEvent(onHomieEvent);
   Homie_setBrand("Ambilight");
