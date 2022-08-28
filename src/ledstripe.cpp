@@ -11,12 +11,30 @@
  */
 
 #include "ledstripe.h"
+#include <Adafruit_NeoPixel.h>
+
+/******************************************************************************
+ *                            LOCAL VARIABLES
+ ******************************************************************************/
+Adafruit_NeoPixel* pPixels = NULL;
 
 ledstripe_color ledstripe_framebuffer[LEDSTRIPE_FRAMEBUFFER_SIZE];
 
 
+/******************************************************************************
+ *                            GLOBAL VARIABLES
+ ******************************************************************************/
+
 void ledstripe_init(int pin) {
-	//FIXME
+	pPixels = new Adafruit_NeoPixel(LEDSTRIPE_FRAMEBUFFER_SIZE, pin, NEO_GRB + NEO_KHZ800);
+  	pPixels->begin();
+  	pPixels->clear();
+}
+
+void ledstrip_fill(uint8_t r, uint8_t g, uint8_t b) {
+    uint32_t c = pPixels->Color(r,g,b);
+    pPixels->fill(c);
+    pPixels->show();   // make sure it is visible
 }
 
 void ledstripe_show(void) {
