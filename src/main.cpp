@@ -43,6 +43,12 @@ bool mConfigured = false;
  *                            LOCAL FUNCTIONS
 ******************************************************************************/
 
+void loopHandler() {
+  if (mConfigured) {
+    boblight_loop();
+    ledstripe_show();
+  }
+}
 
 /******************************************************************************
  *                            GLOBAL FUNCTIONS
@@ -51,6 +57,8 @@ bool mConfigured = false;
 void setup() {
   Serial.begin(115200);
   Homie_setFirmware(HOMIE_FIRMWARE_NAME, "1.0.0");
+  Homie.setLoopFunction(loopHandler);
+  Homie_setBrand("Ambilight");
   Homie.setup();
   
   mConfigured = Homie.isConfigured();
@@ -66,8 +74,4 @@ void setup() {
 
 void loop() {
   Homie.loop();
-  if (mConfigured) {
-    boblight_loop();
-    ledstripe_show();
-  }
 }
