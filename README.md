@@ -7,7 +7,7 @@ Control WS2812 LEDs from a  ESP8266 (nodemcu)
 ## Development
 * File
  * Open Workspace
-  * Select the file in this repository:  WIoLight.code-workspace
+  * Select the file in this repository:  HomieBob.code-workspace
 
 ## Filesystem
 ### Configuration
