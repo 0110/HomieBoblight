@@ -38,7 +38,7 @@
  *                            LOCAL VARIABLES
 ******************************************************************************/
 HomieNode ledNode("led", "RGB led", "color");
-HomieNode tvInput("local", "USB control enabled", "switch");
+HomieNode tvInput("control", "USB control enabled", "switch");
 
 bool mConfigured = false;
 bool mConnected = false;
@@ -73,6 +73,8 @@ void loopHandler() {
       ledstripe_show();
     }
   }
+  // Feed the dog -> ESP stay alive
+  ESP.wdtFeed();
 }
 
 bool allLedsHandler(const HomieRange& range, const String& value) {
@@ -115,13 +117,14 @@ void setup() {
   Homie_setFirmware(HOMIE_FIRMWARE_NAME, "1.1.0");
   Homie.setLoopFunction(loopHandler);
   Homie.onEvent(onHomieEvent);
-  Homie_setBrand("Ambilight");
-  ledNode.advertise("ambient").setName("All Leds")
-                            .setDatatype("color").setFormat("rgb")
-                            .settable(allLedsHandler);
   tvInput.advertise("value").setName("Value")
                                       .setDatatype("Boolean")
                                       .settable(switchHandler);
+  /*
+  ledNode.advertise("ambient").setName("All Leds")
+                            .setDatatype("color").setFormat("rgb")
+                            .settable(allLedsHandler);
+                                      */
   Homie.setup();
   
   mConfigured = Homie.isConfigured();
