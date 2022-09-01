@@ -29,14 +29,27 @@ void ledstripe_init(int pin) {
 	pPixels = new Adafruit_NeoPixel(LEDSTRIPE_FRAMEBUFFER_SIZE, pin, NEO_GRB + NEO_KHZ800);
   	pPixels->begin();
   	pPixels->clear();
+    for( int i = 0; i < LEDSTRIPE_FRAMEBUFFER_SIZE; i++ ) {
+        pPixels->setPixelColor(i, pPixels->Color(0 /*red */, 120 /* green */, 0 /* blue */));
+    }
+    pPixels->show();   // make sure it is visible
+
 }
 
 void ledstrip_fill(uint8_t r, uint8_t g, uint8_t b) {
     uint32_t c = pPixels->Color(r,g,b);
     pPixels->fill(c);
-    pPixels->show();   // make sure it is visible
+}
+
+void ledstripe_update(void) {
+    int i;
+    for (i=0; i < LEDSTRIPE_FRAMEBUFFER_SIZE; i++) {
+        pPixels->setPixelColor(i, pPixels->Color(   ledstripe_framebuffer[i].red, 
+                                                    ledstripe_framebuffer[i].green, 
+                                                    ledstripe_framebuffer[i].blue));
+    }
 }
 
 void ledstripe_show(void) {
-	//FIXME
+    pPixels->show();   // make sure it is visible
 }

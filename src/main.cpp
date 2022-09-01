@@ -57,15 +57,14 @@ void onHomieEvent(const HomieEvent &event)
 {
   switch (event.type)
   {
-  case HomieEventType::SENDING_STATISTICS:
+  case HomieEventType::MQTT_READY:
+    mConnected = true;
     if (mSerialInput) {
       mNodeTVsource.setProperty("value").send("ON");
     } else {
       mNodeTVsource.setProperty("value").send("OFF");
     }
     break;
-  case HomieEventType::MQTT_READY:
-    mConnected = true;
   default:
     break;
   }
@@ -73,10 +72,11 @@ void onHomieEvent(const HomieEvent &event)
 
 void loopHandler() {
   if (mConfigured) {
-    boblight_loop();
     if (mSerialInput) {
-      ledstripe_show();
+      boblight_loop();
+      ledstripe_update();
     }
+    ledstripe_show();
   }
   // Feed the dog -> ESP stay alive
   ESP.wdtFeed();
@@ -87,18 +87,26 @@ bool allLedsHandler(const HomieRange& range, const String& value) {
 
   int sep1 = value.indexOf(',');
   int sep2 = value.indexOf(',', sep1 + 1);
-  int red = value.substring(0,sep1).toInt(); /* OpenHAB  hue (0-360°) */
-  int green = value.substring(sep1 + 1, sep2).toInt(); /* OpenHAB saturation (0-100%) */
-  int blue = value.substring(sep2 + 1, value.length()).toInt(); /* brightness (0-100%) */
+  if ((sep1 > 0) && (sep2 > 0)) {
+    int red = value.substring(0,sep1).toInt(); 
+    int green = value.substring(sep1 + 1, sep2).toInt(); 
+    int blue = value.substring(sep2 + 1, value.length()).toInt();
 
-  uint8_t r = (red * 255) / 250;
-  uint8_t g = (green *255) / 250;
-  uint8_t b = (blue *255) / 250;
-  ledstrip_fill(r, g, b);
-  if (mConnected) {
-    mNodeLed.setProperty(HOMIE_AMBIENT).send(String(value));
+    uint8_t r = (red * 255) / 250;
+    uint8_t g = (green *255) / 250;
+    uint8_t b = (blue *255) / 250;
+    ledstrip_fill(r, g, b);
+    Serial.printf("Filled: %d-%d-%d\r\n", red, green, blue);
+    Serial.flush();
+
+    if (mConnected) {
+      mNodeLed.setProperty(HOMIE_AMBIENT).send(String(value));
+    }
+    return true;
+  } else {
+    Serial << String("Color: " + value) << endl;
+    return false;
   }
-  return true;
 }
 
 bool switchHandler(const HomieRange& range, const String& value) {
@@ -110,6 +118,7 @@ bool switchHandler(const HomieRange& range, const String& value) {
     mSerialInput = true;
     mNodeTVsource.setProperty("value").send(value);
   }
+  Serial << String("Switch: " + value) << endl;
   return true;
 }
 
@@ -141,8 +150,7 @@ void setup() {
     Serial.println("Not configured");
     Serial.flush();
   } else {
-    Serial.println("Start LED");
-    ledstripe_init(D4 /* GPIO2 */);
+    ledstripe_init(D1 /* GPIO5 */);
     boblight_init(); 
   }
 }

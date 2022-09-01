@@ -211,12 +211,12 @@ void boblight_init(void)
 
 int boblight_loop(void)
 {
-	long time = millis();
+	unsigned long time = millis();
 	//read serial input
 	readDirectWS2812cmd(textbuffer);
 
 	/* Send ACK to host each second */
-	if ((time + 1000) < millis())
+	if ((time + 1000U) < millis())
 	{
 		Serial.print("Ada\n");
 		time = millis();

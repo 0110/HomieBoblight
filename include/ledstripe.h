@@ -44,7 +44,17 @@ extern ledstripe_color ledstripe_framebuffer[LEDSTRIPE_FRAMEBUFFER_SIZE];
  */
 void ledstripe_init(int pin);
 
+/**
+ * @brief Write the currently set LED values to the hardware
+ * 
+ */
 void ledstripe_show(void);
+
+/**
+ * @brief convert buffer to LED hardware 
+ * Input is defined in @see ledstripe_framebuffer
+ */
+void ledstripe_update(void);
 
 #ifdef __cplusplus
 }
