@@ -16,13 +16,13 @@
 /******************************************************************************
  *                            LOCAL VARIABLES
  ******************************************************************************/
-Adafruit_NeoPixel* pPixels = NULL;
+static Adafruit_NeoPixel* pPixels = NULL;
 
 ledstripe_color ledstripe_framebuffer[LEDSTRIPE_FRAMEBUFFER_SIZE];
 
 
 /******************************************************************************
- *                            GLOBAL VARIABLES
+ *                            GLOBAL FUNCTIONS
  ******************************************************************************/
 
 void ledstripe_init(int pin) {
@@ -37,8 +37,10 @@ void ledstripe_init(int pin) {
 }
 
 void ledstrip_fill(uint8_t r, uint8_t g, uint8_t b) {
-    uint32_t c = pPixels->Color(r,g,b);
-    pPixels->fill(c);
+    pPixels->fill(pPixels->Color(r,g,b));
+
+    Serial.printf("fill: %d-%d-%d\r\n", r, g, b);
+    Serial.flush();
 }
 
 void ledstripe_update(void) {

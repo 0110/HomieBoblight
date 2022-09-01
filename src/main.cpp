@@ -24,6 +24,8 @@
 
 #define HOMIE_AMBIENT "ambient"
 
+#define WORKING_INTERVAL  50 /* ms */
+
 /******************************************************************************
  *                                     MACROS
 ******************************************************************************/
@@ -45,6 +47,7 @@ HomieNode mNodeTVsource("control", "USB control enabled", "switch");
 HomieSetting<bool> mSettingLogging("debug", "MQTT topic with debug logs");
 
 
+unsigned long mLastAction = 0;
 bool mConfigured = false;
 bool mConnected = false;
 bool mSerialInput = true; /**< Serial control via USB UART */
@@ -72,12 +75,17 @@ void onHomieEvent(const HomieEvent &event)
 
 void loopHandler() {
   if (mConfigured) {
-    if (mSerialInput) {
-      boblight_loop();
-      ledstripe_update();
-    }
-    ledstripe_show();
-  }
+       if ( ((millis() - mLastAction) >= (WORKING_INTERVAL)) ||
+        (mLastAction == 0) ) {
+          if (mSerialInput) {
+            boblight_loop();
+            ledstripe_update();
+          }
+          ledstripe_show();
+        }
+        mLastAction = millis();
+   }   
+
   // Feed the dog -> ESP stay alive
   ESP.wdtFeed();
 }
@@ -87,7 +95,7 @@ bool allLedsHandler(const HomieRange& range, const String& value) {
 
   int sep1 = value.indexOf(',');
   int sep2 = value.indexOf(',', sep1 + 1);
-  if ((sep1 > 0) && (sep2 > 0)) {
+  if ((sep1 > 0) && (sep2 > 0) && mSerialInput) {
     int red = value.substring(0,sep1).toInt(); 
     int green = value.substring(sep1 + 1, sep2).toInt(); 
     int blue = value.substring(sep2 + 1, value.length()).toInt();
@@ -96,15 +104,13 @@ bool allLedsHandler(const HomieRange& range, const String& value) {
     uint8_t g = (green *255) / 250;
     uint8_t b = (blue *255) / 250;
     ledstrip_fill(r, g, b);
-    Serial.printf("Filled: %d-%d-%d\r\n", red, green, blue);
-    Serial.flush();
 
     if (mConnected) {
       mNodeLed.setProperty(HOMIE_AMBIENT).send(String(value));
     }
     return true;
   } else {
-    Serial << String("Color: " + value) << endl;
+    Serial << String(String(mSerialInput) + String(" Color: " + value)) << endl;
     return false;
   }
 }
@@ -118,7 +124,6 @@ bool switchHandler(const HomieRange& range, const String& value) {
     mSerialInput = true;
     mNodeTVsource.setProperty("value").send(value);
   }
-  Serial << String("Switch: " + value) << endl;
   return true;
 }
 

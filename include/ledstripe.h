@@ -56,6 +56,8 @@ void ledstripe_show(void);
  */
 void ledstripe_update(void);
 
+void ledstrip_fill(uint8_t r, uint8_t g, uint8_t b);
+
 #ifdef __cplusplus
 }
 #endif

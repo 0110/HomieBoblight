@@ -18,6 +18,4 @@ void boblight_init(void);
  */
 int boblight_loop(void);
 
-void ledstrip_fill(uint8_t r, uint8_t g, uint8_t b);
-
 #endif /* BOBLIGHT_H_ */
