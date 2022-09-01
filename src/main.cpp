@@ -22,6 +22,8 @@
 ******************************************************************************/
 #define HOMIE_FIRMWARE_NAME "Boblight"
 
+#define HOMIE_AMBIENT "ambient"
+
 /******************************************************************************
  *                                     MACROS
 ******************************************************************************/
@@ -37,8 +39,11 @@
 /******************************************************************************
  *                            LOCAL VARIABLES
 ******************************************************************************/
-HomieNode ledNode("led", "RGB led", "color");
-HomieNode tvInput("control", "USB control enabled", "switch");
+HomieNode mNodeLed("led", "Light", "led");
+HomieNode mNodeTVsource("control", "USB control enabled", "switch");
+
+HomieSetting<bool> mSettingLogging("debug", "MQTT topic with debug logs");
+
 
 bool mConfigured = false;
 bool mConnected = false;
@@ -54,9 +59,9 @@ void onHomieEvent(const HomieEvent &event)
   {
   case HomieEventType::SENDING_STATISTICS:
     if (mSerialInput) {
-      tvInput.setProperty("value").send("ON");
+      mNodeTVsource.setProperty("value").send("ON");
     } else {
-      tvInput.setProperty("value").send("OFF");
+      mNodeTVsource.setProperty("value").send("OFF");
     }
     break;
   case HomieEventType::MQTT_READY:
@@ -91,7 +96,7 @@ bool allLedsHandler(const HomieRange& range, const String& value) {
   uint8_t b = (blue *255) / 250;
   ledstrip_fill(r, g, b);
   if (mConnected) {
-    ledNode.setProperty("ambient").send(String(value));
+    mNodeLed.setProperty(HOMIE_AMBIENT).send(String(value));
   }
   return true;
 }
@@ -100,10 +105,10 @@ bool switchHandler(const HomieRange& range, const String& value) {
   if (range.isRange) return false;  // only one switch is present
   if (value == "off" || value == "Off" || value == "OFF" || value == "false") {
     mSerialInput = false;
-    tvInput.setProperty("value").send(value);
+    mNodeTVsource.setProperty("value").send(value);
   } else if (value == "on" || value == "On" || value == "ON" || value == "true") {
     mSerialInput = true;
-    tvInput.setProperty("value").send(value);
+    mNodeTVsource.setProperty("value").send(value);
   }
   return true;
 }
@@ -117,16 +122,20 @@ void setup() {
   Homie_setFirmware(HOMIE_FIRMWARE_NAME, "1.1.0");
   Homie.setLoopFunction(loopHandler);
   Homie.onEvent(onHomieEvent);
-  tvInput.advertise("value").setName("Value")
-                                      .setDatatype("Boolean")
-                                      .settable(switchHandler);
-  /*
-  ledNode.advertise("ambient").setName("All Leds")
-                            .setDatatype("color").setFormat("rgb")
-                            .settable(allLedsHandler);
-                                      */
+                            
   Homie.setup();
   
+  mSettingLogging.setDefaultValue(false).setValidator([] (int candidate) {
+    return true;
+  });
+
+  mNodeTVsource.advertise("value").setName("Value")
+                                      .setDatatype("Boolean")
+                                      .settable(switchHandler);
+  mNodeLed.advertise(HOMIE_AMBIENT).setName("RGBType")
+                            .setDatatype("color").settable(allLedsHandler);
+
+
   mConfigured = Homie.isConfigured();
   if (!mConfigured) {
     Serial.println("Not configured");
