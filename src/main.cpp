@@ -112,7 +112,7 @@ bool allLedsHandler(const HomieRange& range, const String& value) {
     }
     return true;
   } else {
-    Serial << String(String(mSerialInput) + String(" Color: " + value)) << endl;
+    log(LOG_LEVEL_DEBUG, String(String(mSerialInput) + String(" Color: " + value)));
     return false;
   }
 }
@@ -122,9 +122,11 @@ bool switchHandler(const HomieRange& range, const String& value) {
   if (value == "off" || value == "Off" || value == "OFF" || value == "false") {
     mSerialInput = false;
     mNodeTVsource.setProperty("value").send(value);
+    log(LOG_LEVEL_DEBUG, String("Serial input deactivated"));
   } else if (value == "on" || value == "On" || value == "ON" || value == "true") {
     mSerialInput = true;
     mNodeTVsource.setProperty("value").send(value);
+    log(LOG_LEVEL_DEBUG, String("Serial input activated"));
   }
   return true;
 }
