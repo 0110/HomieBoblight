@@ -16,6 +16,7 @@
 #include <Homie.h>
 #include "ledstripe.h"
 #include "boblight.h"
+#include "MQTTUtils.h"
 
 /******************************************************************************
  *                                     DEFINES
@@ -61,6 +62,7 @@ void onHomieEvent(const HomieEvent &event)
   switch (event.type)
   {
   case HomieEventType::MQTT_READY:
+    mqttSetAlive();
     mConnected = true;
     if (mSerialInput) {
       mNodeTVsource.setProperty("value").send("ON");
