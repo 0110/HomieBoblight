@@ -82,6 +82,34 @@ hscan   0 100
 vscan   0 100
 ```
 
+### MQTT
+
+Two input targets are defined
+* control (Switch [boolean])
+* led     (Color [rgb])
+
+By default **USB serial** is used as input source.
+In order to activate control via MQTT. Set **control** to ```OFF``` and the desired color can be set via **led**.
+
+A possible OpenHAB setup my look like:
+
+tv.items:
+```
+Color TVambiColor       "TV Ambilight"  { channel="mqtt:homie300:MqttBroker:tvambi:led#ambient" }
+Switch TVambiControl    "TV Ambilight Control" { channel="mqtt:homie300:MqttBroker:tvambi:control#value" }
+```
+
+tv.rules
+```
+rule "Kode stopped, light on"
+when
+        Item Kodi_Stop changed from OFF to ON
+then
+        sendCommand(TVambiControl, OFF)
+        sendCommand(TVambiColor, HSBType::BLUE)
+end
+```
+
 ## Sources / Inspirations
 * [STM32F4 Discovery board version](https://github.com/0110/STMboblight)
 * [Adalight](https://github.com/adafruit/Adalight/blob/master/Arduino/LEDstream_LPD8806/LEDstream_LPD8806.pde)
