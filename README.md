@@ -1,8 +1,6 @@
-# Homie
+# Homie Boblight Release
 
-## Boblight Release
-
-Control WS2812 LEDs from a  ESP8266 (nodemcu)
+Control WS2812 LEDs via ESP8266 (e.g. nodemcu)
 
 ## Development
 * File
@@ -19,16 +17,13 @@ Open a new Atom-Terminal and generate the filesystem with the following command 
 Upload this new generated filesystem with:
 ```pio run -t uploadfs```
 
-# Hardware
-* D4: WS2812 RGB LEDs
-
-### Hardware
+## Hardware
 
 * PC / Raspberry to run boblight e.g. in combination with [Kodi](kodi.tv)
 * WS2812 LEDs
 * ESP8266 (e.g. nodemcu)
   * Hardware interface
-    * GPIO2 is connected with the data input of the first WS2812
+    * GPIO5 (D1) is connected with the data input of the first WS2812
     * GND is also connected with the WS2812
     * 5V power supply, can be the same as for the WS2812
     * USB-Connecten for the USB serial
@@ -87,7 +82,7 @@ hscan   0 100
 vscan   0 100
 ```
 
-### Sources / Inspirations
-* [STM32F4 Discovery board](https://github.com/0110/STMboblight)
+## Sources / Inspirations
+* [STM32F4 Discovery board version](https://github.com/0110/STMboblight)
 * [Adalight](https://github.com/adafruit/Adalight/blob/master/Arduino/LEDstream_LPD8806/LEDstream_LPD8806.pde)
 
