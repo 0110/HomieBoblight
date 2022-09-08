@@ -3,7 +3,7 @@
 
 bool volatile mAliveWasRead = false;
 
-void log(int level, String message)
+void mqttlog(int level, String message)
 {
   String buffer;
   StaticJsonDocument<200> doc;

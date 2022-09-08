@@ -20,6 +20,6 @@
 bool aliveWasRead();
 void mqttSetAlive(void);
 
-void log(int level, String message);
+void mqttlog(int level, String message);
 
 #endif

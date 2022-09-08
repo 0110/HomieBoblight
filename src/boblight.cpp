@@ -70,6 +70,7 @@ static uint32_t meanBlue = 0;
 
 static uint32_t oldCRCvalue         = 0U;
 static uint32_t sameColorCounter    = 0U;
+static unsigned long mTime;
 
 static char textbuffer[TEXTLINE_MAX_LENGTH];
 
@@ -206,12 +207,12 @@ void boblight_init(void)
 {
 	/* Say hello to the host */
 	Serial.print("Ada\n");
+	mTime = millis();
 	memset(textbuffer, 0, TEXTLINE_MAX_LENGTH);
 }
 
 int boblight_loop(void)
 {
-	unsigned long time = millis();
 
 	//read serial input
 	if (Serial.available() > 0) {
@@ -219,11 +220,11 @@ int boblight_loop(void)
 	}
 
 	/* Send ACK to host each second */
-	if ((time + 1000U) < millis())
+	if ((mTime + 1000U) < millis())
 	{
 		Serial.print("Ada\n");
 		Serial.flush();
-		time = millis();
+		mTime = millis();
 	}
 
 	return TRUE;

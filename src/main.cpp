@@ -83,20 +83,6 @@ void onHomieEvent(const HomieEvent &event)
 }
 
 void loopHandler() {
-  if ( ((millis() - mLastAction) >= (WORKING_INTERVAL)) ||
-      (mLastAction == 0) ) {
-    if (mConfigured) {
-      if (mSerialInput) {
-        boblight_loop();
-        ledstripe_update();
-      }
-      ledstripe_show();
-    } else {
-      ledstripe_toggle(60, 0, 0); /* Red indicates not configured */
-    }
-    mLastAction = millis();
-  }
-
   // Feed the dog -> ESP stay alive
   ESP.wdtFeed();
 }
@@ -121,7 +107,7 @@ bool allLedsHandler(const HomieRange& range, const String& value) {
     }
     return true;
   } else {
-    log(LOG_LEVEL_DEBUG, String(String(mSerialInput) + String(" Color: " + value)));
+    mqttlog(LOG_LEVEL_DEBUG, String(String(mSerialInput) + String(" Color: " + value)));
     return false;
   }
 }
@@ -131,11 +117,11 @@ bool switchHandler(const HomieRange& range, const String& value) {
   if (value == "off" || value == "Off" || value == "OFF" || value == "false") {
     mSerialInput = false;
     mNodeTVsource.setProperty("value").send(value);
-    log(LOG_LEVEL_DEBUG, String("Serial input deactivated"));
+    mqttlog(LOG_LEVEL_DEBUG, String("Serial input deactivated"));
   } else if (value == "on" || value == "On" || value == "ON" || value == "true") {
     mSerialInput = true;
     mNodeTVsource.setProperty("value").send(value);
-    log(LOG_LEVEL_DEBUG, String("Serial input activated"));
+    mqttlog(LOG_LEVEL_DEBUG, String("Serial input activated"));
   }
   return true;
 }
@@ -176,4 +162,18 @@ void setup() {
 
 void loop() {
   Homie.loop();
+  /* Update the LEDs */
+  if ( ((millis() - mLastAction) >= (WORKING_INTERVAL)) ||
+      (mLastAction == 0) ) {
+    if (mConfigured) {
+      if (mSerialInput) {
+        boblight_loop();
+        ledstripe_update();
+      }
+      ledstripe_show();
+    } else {
+      ledstripe_toggle(60, 0, 0); /* Red indicates not configured */
+    }
+    mLastAction = millis();
+  }
 }
