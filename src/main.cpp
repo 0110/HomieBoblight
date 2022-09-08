@@ -92,7 +92,7 @@ bool allLedsHandler(const HomieRange& range, const String& value) {
 
   int sep1 = value.indexOf(',');
   int sep2 = value.indexOf(',', sep1 + 1);
-  if ((sep1 > 0) && (sep2 > 0) && mSerialInput) {
+  if ((sep1 > 0) && (sep2 > 0) && (mSerialInput == 0)) {
     int red = value.substring(0,sep1).toInt(); 
     int green = value.substring(sep1 + 1, sep2).toInt(); 
     int blue = value.substring(sep2 + 1, value.length()).toInt();
@@ -169,6 +169,8 @@ void loop() {
       if (mSerialInput) {
         boblight_loop();
         ledstripe_update();
+      } else {
+        /* Color was already set in allLedsHandler function */
       }
       ledstripe_show();
     } else {
