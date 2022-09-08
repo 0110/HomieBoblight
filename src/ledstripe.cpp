@@ -20,6 +20,7 @@ static Adafruit_NeoPixel* pPixels = NULL;
 
 ledstripe_color ledstripe_framebuffer[LEDSTRIPE_FRAMEBUFFER_SIZE];
 
+static int mToogleState = 0;
 
 /******************************************************************************
  *                            GLOBAL FUNCTIONS
@@ -34,6 +35,20 @@ void ledstripe_init(int pin) {
     }
     pPixels->show();   // make sure it is visible
 
+}
+
+void ledstripe_toggle(uint8_t red, uint8_t green, uint8_t blue) {
+    pPixels->clear();
+    if (mToogleState) {
+        for( int i = 0; i < LEDSTRIPE_TOGGLE_LENGTH; i++ ) {
+            pPixels->setPixelColor(i, pPixels->Color(red, green, blue));
+        }
+        mToogleState = 0;
+    } else {
+        mToogleState = 1;
+    }
+
+    pPixels->show();   // make sure it is visible
 }
 
 void ledstrip_fill(uint8_t r, uint8_t g, uint8_t b) {

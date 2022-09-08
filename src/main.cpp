@@ -61,9 +61,16 @@ void onHomieEvent(const HomieEvent &event)
 {
   switch (event.type)
   {
+  case HomieEventType::WIFI_CONNECTED:
+    mConnected = true;
+    break;
+  case HomieEventType::WIFI_DISCONNECTED:
+    mConnected = false;
+    mSerialInput = true;
+    Serial << "No Wifi" << endl;
+    break;
   case HomieEventType::MQTT_READY:
     mqttSetAlive();
-    mConnected = true;
     if (mSerialInput) {
       mNodeTVsource.setProperty("value").send("ON");
     } else {
@@ -76,17 +83,19 @@ void onHomieEvent(const HomieEvent &event)
 }
 
 void loopHandler() {
-  if (mConfigured) {
-       if ( ((millis() - mLastAction) >= (WORKING_INTERVAL)) ||
-        (mLastAction == 0) ) {
-          if (mSerialInput) {
-            boblight_loop();
-            ledstripe_update();
-          }
-          ledstripe_show();
-        }
-        mLastAction = millis();
-   }   
+  if ( ((millis() - mLastAction) >= (WORKING_INTERVAL)) ||
+      (mLastAction == 0) ) {
+    if (mConfigured) {
+      if (mSerialInput) {
+        boblight_loop();
+        ledstripe_update();
+      }
+      ledstripe_show();
+    } else {
+      ledstripe_toggle(60, 0, 0); /* Red indicates not configured */
+    }
+    mLastAction = millis();
+  }
 
   // Feed the dog -> ESP stay alive
   ESP.wdtFeed();
@@ -138,6 +147,7 @@ bool switchHandler(const HomieRange& range, const String& value) {
 void setup() {
   Serial.begin(115200);
   Homie_setFirmware(HOMIE_FIRMWARE_NAME, "1.1.0");
+  Homie.disableLogging();
   Homie.setLoopFunction(loopHandler);
   Homie.onEvent(onHomieEvent);
                             
