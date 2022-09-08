@@ -91,7 +91,7 @@ Two input targets are defined
 By default **USB serial** is used as input source.
 In order to activate control via MQTT. Set **control** to ```OFF``` and the desired color can be set via **led**.
 
-A possible OpenHAB setup my look like:
+A possible OpenHAB setup may look like:
 
 tv.items:
 ```
@@ -99,7 +99,7 @@ Color TVambiColor       "TV Ambilight"  { channel="mqtt:homie300:MqttBroker:tvam
 Switch TVambiControl    "TV Ambilight Control" { channel="mqtt:homie300:MqttBroker:tvambi:control#value" }
 ```
 
-tv.rules
+tv.rules:
 ```
 rule "Kode stopped, light on"
 when
