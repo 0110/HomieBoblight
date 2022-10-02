@@ -18,4 +18,12 @@ void boblight_init(void);
  */
 int boblight_loop(void);
 
+/** 
+ * Receive statistic information
+ */
+long getCountRecevied(void);
+long getCountDuplicate(void);
+long getCountValid(void);
+long getCountSuperBright(void);
+
 #endif /* BOBLIGHT_H_ */

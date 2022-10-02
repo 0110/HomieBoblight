@@ -72,6 +72,11 @@ static uint32_t oldCRCvalue         = 0U;
 static uint32_t sameColorCounter    = 0U;
 static unsigned long mTime;
 
+static uint32_t mCountRecevied 		= 0U;
+static uint32_t mCountDuplicate 	= 0U;
+static uint32_t mCountValid			= 0U;
+static uint32_t mCountSuperBright	= 0U;
+
 static char textbuffer[TEXTLINE_MAX_LENGTH];
 
 /******************************************************************************
@@ -103,13 +108,16 @@ static void calculateDynamicDim( void )
 	/* Handle too bright LEDs */
 	if (meanSum > 255)
 	{
+		mCountSuperBright++;
 		if (dynamicColorFactor > FACTOR_MINIMUM)
 		{
 			/* Color is too bright for longer periods */
 			dynamicColorFactor -= FACTOR_DECREASE_STEP;
 		}
 	}
-	else if (crc == oldCRCvalue) {
+	else if (crc == oldCRCvalue)
+	{
+		mCountDuplicate++;	
 	    if (sameColorCounter > ALLOWED_SAME_COLOR) {
 	        /* Same color for longer period... dim the lights down */
 	        if (dynamicColorFactor > FACTOR_DECREASE_SAME_STEP) {
@@ -126,6 +134,7 @@ static void calculateDynamicDim( void )
 	}
 	else
 	{
+		mCountValid++;
         if (dynamicColorFactor < FACTOR_MINIMUM) {
             /* reset */
             sameColorCounter = 0U;
@@ -152,6 +161,7 @@ static int readDirectWS2812cmd(char *textbuffer)
 	int length = Serial.read(textbuffer, TEXTLINE_MAX_LENGTH);
 	if(length > 0)
 	{
+		mCountRecevied++;
 		for(i=0; i < length; i++)
 		{
 			/** Handle Frame beginning */
@@ -229,3 +239,31 @@ int boblight_loop(void)
 
 	return TRUE;
 }
+
+/**
+ * @brief Get the Count Recevied LED telegrams
+ * 
+ * @return long 
+ */
+long getCountRecevied(void) { return mCountRecevied; }
+
+/**
+ * @brief Get the Count Duplicate LED telegrams
+ * 
+ * @return long 
+ */
+long getCountDuplicate(void) { return mCountDuplicate; }
+
+/**
+ * @brief Get the Count Valid LED telegrams
+ * 
+ * @return long 
+ */
+long getCountValid(void) { return mCountValid; }
+
+/**
+ * @brief Get the Count Super Bright telegram
+ * 
+ * @return long 
+ */
+long getCountSuperBright(void) { return mCountSuperBright; }

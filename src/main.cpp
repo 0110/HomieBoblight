@@ -23,6 +23,8 @@
 ******************************************************************************/
 #define HOMIE_FIRMWARE_NAME "Boblight"
 
+#define HOMIE_FIRMWARE_VERSION "1.2.0"
+
 #define HOMIE_AMBIENT "ambient"
 
 #define WORKING_INTERVAL  50 /* ms */
@@ -132,7 +134,7 @@ bool switchHandler(const HomieRange& range, const String& value) {
 
 void setup() {
   Serial.begin(115200);
-  Homie_setFirmware(HOMIE_FIRMWARE_NAME, "1.1.0");
+  Homie_setFirmware(HOMIE_FIRMWARE_NAME, HOMIE_FIRMWARE_VERSION);
   Homie.disableLogging();
   Homie.setLoopFunction(loopHandler);
   Homie.onEvent(onHomieEvent);
