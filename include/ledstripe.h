@@ -59,6 +59,15 @@ void ledstripe_update(void);
 
 void ledstrip_fill(uint8_t r, uint8_t g, uint8_t b);
 
+/**
+ * @brief Update a subset of LEDs (defined by @see LEDSTRIPE_TOGGLE_LENGTH)
+ * with the color, defined by all three arguments
+ * @param r 	red		(0-255)
+ * @param g 	green	(0-255)
+ * @param b 	blue	(0-255)
+ */
+void ledstrip_status(uint8_t r, uint8_t g, uint8_t b);
+
 void ledstripe_toggle(uint8_t red, uint8_t green, uint8_t blue);
 
 #ifdef __cplusplus

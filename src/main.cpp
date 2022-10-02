@@ -75,8 +75,8 @@ void onHomieEvent(const HomieEvent &event)
   switch (event.type)
   {
   case HomieEventType::WIFI_CONNECTED:
+    ledstrip_status(0, 0, 128);
     mConnected = true;
-    Serial.println("Wifi Connected");
     break;
   case HomieEventType::WIFI_DISCONNECTED:
     mConnected = false;
@@ -84,7 +84,7 @@ void onHomieEvent(const HomieEvent &event)
     Serial << "No Wifi" << endl;
     break;
   case HomieEventType::MQTT_READY:
-    Serial.println("MQTT found");
+    ledstrip_status(60, 0, 0);
     mqttSetAlive();
     if (mSerialInput) {
       mNodeTVsource.setProperty("value").send("ON");
@@ -151,7 +151,7 @@ bool allLedsHandler(const HomieRange& range, const String& value) {
     }
     return true;
   } else {
-    mqttlog(LOG_LEVEL_DEBUG, String(String(mSerialInput) + String(" Color: " + value)));
+    mqttlog(LOG_LEVEL_DEBUG, String(String("Serial=") + String(mSerialInput) + String(" Color: " + value)));
     return false;
   }
 }
@@ -213,6 +213,7 @@ void setup() {
     Serial.flush();
   } else {
     boblight_init();
+    delay(100); /* wait 100ms */
     Serial.println("Init done");
     Serial.flush();
   }
@@ -221,8 +222,7 @@ void setup() {
 void loop() {
   Homie.loop();
   /* Update the LEDs */
-  if ( ((millis() - mLastAction) >= (WORKING_INTERVAL)) ||
-      (mLastAction == 0) ) {
+  if ( ((millis() - mLastAction) >= (WORKING_INTERVAL)) ) {
     if (mConfigured) {
       if (mSerialInput) {
         boblight_loop();

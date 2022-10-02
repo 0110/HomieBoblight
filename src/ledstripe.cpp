@@ -30,7 +30,7 @@ void ledstripe_init(int pin) {
 	pPixels = new Adafruit_NeoPixel(LEDSTRIPE_FRAMEBUFFER_SIZE, pin, NEO_GRB + NEO_KHZ800);
   	pPixels->begin();
   	pPixels->clear();
-    for( int i = 0; i < LEDSTRIPE_FRAMEBUFFER_SIZE; i++ ) {
+    for( int i = 0; i < LEDSTRIPE_TOGGLE_LENGTH; i++ ) {
         pPixels->setPixelColor(i, pPixels->Color(0 /*red */, 120 /* green */, 0 /* blue */));
     }
     pPixels->show();   // make sure it is visible
@@ -53,9 +53,14 @@ void ledstripe_toggle(uint8_t red, uint8_t green, uint8_t blue) {
 
 void ledstrip_fill(uint8_t r, uint8_t g, uint8_t b) {
     pPixels->fill(pPixels->Color(r,g,b));
+}
 
-    Serial.printf("fill: %d-%d-%d\r\n", r, g, b);
-    Serial.flush();
+void ledstrip_status(uint8_t r, uint8_t g, uint8_t b) {
+  	pPixels->clear();
+    for( int i = 0; i < LEDSTRIPE_TOGGLE_LENGTH; i++ ) {
+        pPixels->setPixelColor(i, pPixels->Color(r /*red */, g /* green */, b /* blue */));
+    }
+    pPixels->show();   // make sure it is visible
 }
 
 void ledstripe_update(void) {
