@@ -21,6 +21,6 @@ fi
 echo "Waiting ..."
 mosquitto_sub -h $mqttHost -t "${mqttPrefix}${homieId}/#" -R -C 1
 set -e
-python ota_updater.py -l $mqttHost -t "$mqttPrefix" -i "$homieId" $firmwareFile
+python3 ota_updater.py -l $mqttHost -t "$mqttPrefix" -i "$homieId" $firmwareFile
 
 exit 0
