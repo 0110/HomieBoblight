@@ -23,7 +23,7 @@
 ******************************************************************************/
 #define HOMIE_FIRMWARE_NAME "Boblight"
 
-#define HOMIE_FIRMWARE_VERSION "1.2.0"
+#define HOMIE_FIRMWARE_VERSION "1.3.0"
 
 
 #define WORKING_INTERVAL  50 /* ms */
@@ -99,7 +99,7 @@ void onHomieEvent(const HomieEvent &event)
 
 void loopHandler() {
 
-  if (aliveWasRead()) {
+  if ((mConfigured) && (aliveWasRead())) {
     /* Update all statistics about received Boblight communication */
     if (mCountRecevied    != getCountRecevied())
     {
@@ -206,12 +206,12 @@ void setup() {
                   setName(NODE_STATISTIC_COUNT_SUPERBRIGHT).
                   setDatatype("Integer");
 
+  ledstripe_init(D1 /* GPIO5 */);
   mConfigured = Homie.isConfigured();
   if (!mConfigured) {
     Serial.println("Not configured");
     Serial.flush();
   } else {
-    ledstripe_init(D1 /* GPIO5 */);
     boblight_init();
     Serial.println("Init done");
     Serial.flush();
