@@ -8,6 +8,7 @@
 
 #include "crc32.h"
 #include "ledstripe.h"
+#include "MQTTUtils.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -76,6 +77,7 @@ static uint32_t mCountRecevied 		= 0U;
 static uint32_t mCountDuplicate 	= 0U;
 static uint32_t mCountValid			= 0U;
 static uint32_t mCountSuperBright	= 0U;
+static uint32_t mCountPings			= 0U;
 
 static char textbuffer[TEXTLINE_MAX_LENGTH];
 
@@ -224,23 +226,29 @@ void boblight_init(void)
 	memset(textbuffer, 0, TEXTLINE_MAX_LENGTH);
 }
 
+/**
+ * @brief Main Loop, processing serial input
+ * 
+ * @return int <code>FALSE</code> if nothing was received
+ * @return int <code>TRUE</code> to update LEDs
+ */
 int boblight_loop(void)
 {
-
 	//read serial input
 	if (Serial.available() > 0) {
 		readDirectWS2812cmd(textbuffer);
+		return TRUE;
+	} else {
+		/* Send ACK to host each second to show, that we are ready */
+		if ((mTime + 1000U) < millis())
+		{
+			mCountPings++;
+			Serial.print("Ada\n");
+			Serial.flush();
+			mTime = millis();
+		}
+		return FALSE;
 	}
-
-	/* Send ACK to host each second */
-	if ((mTime + 1000U) < millis())
-	{
-		Serial.print("Ada\n");
-		Serial.flush();
-		mTime = millis();
-	}
-
-	return TRUE;
 }
 
 /**
@@ -270,3 +278,5 @@ long getCountValid(void) { return mCountValid; }
  * @return long 
  */
 long getCountSuperBright(void) { return mCountSuperBright; }
+
+long getCountPings(void) { return mCountPings; }

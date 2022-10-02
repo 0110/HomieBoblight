@@ -25,5 +25,6 @@ long getCountRecevied(void);
 long getCountDuplicate(void);
 long getCountValid(void);
 long getCountSuperBright(void);
+long getCountPings(void);
 
 #endif /* BOBLIGHT_H_ */

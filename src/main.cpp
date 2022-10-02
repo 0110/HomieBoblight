@@ -23,7 +23,7 @@
 ******************************************************************************/
 #define HOMIE_FIRMWARE_NAME "Boblight"
 
-#define HOMIE_FIRMWARE_VERSION "1.3.0"
+#define HOMIE_FIRMWARE_VERSION "1.4.0"
 
 
 #define WORKING_INTERVAL  50 /* ms */
@@ -34,6 +34,7 @@
 #define NODE_STATISTIC_COUNT_DUPLICATE    "duplicate"
 #define NODE_STATISTIC_COUNT_VALID        "valid"
 #define NODE_STATISTIC_COUNT_SUPERBRIGHT  "superbright"
+#define NODE_STATISTIC_COUNT_PINGS        "adaPings"
 
 /******************************************************************************
  *                                     MACROS
@@ -65,6 +66,7 @@ static long mCountRecevied    = -1;
 static long mCountDuplicate   = -1;
 static long mCountValid       = -1;
 static long mCountSuperBright = -1;
+static long mCountPings = -1;
 
 /******************************************************************************
  *                            LOCAL FUNCTIONS
@@ -124,6 +126,13 @@ void loopHandler() {
       mCountSuperBright = getCountSuperBright();
       mNodeStatistic.setProperty(NODE_STATISTIC_COUNT_SUPERBRIGHT)
                       .send(String(mCountSuperBright));
+    }
+
+
+    if (mCountPings != getCountPings()) {
+      mCountPings = getCountPings();
+      mNodeStatistic.setProperty(NODE_STATISTIC_COUNT_PINGS)
+                      .send(String(mCountPings));
     }
   }
 
@@ -205,6 +214,9 @@ void setup() {
   mNodeStatistic.advertise(NODE_STATISTIC_COUNT_SUPERBRIGHT).
                   setName(NODE_STATISTIC_COUNT_SUPERBRIGHT).
                   setDatatype("Integer");
+  mNodeStatistic.advertise(NODE_STATISTIC_COUNT_PINGS).
+                  setName(NODE_STATISTIC_COUNT_PINGS).
+                  setDatatype("Integer");
 
   ledstripe_init(D1 /* GPIO5 */);
   mConfigured = Homie.isConfigured();
@@ -225,8 +237,9 @@ void loop() {
   if ( ((millis() - mLastAction) >= (WORKING_INTERVAL)) ) {
     if (mConfigured) {
       if (mSerialInput) {
-        boblight_loop();
-        ledstripe_update();
+        if (boblight_loop()) {
+          ledstripe_update();
+        }
       } else {
         /* Color was already set in allLedsHandler function */
       }
