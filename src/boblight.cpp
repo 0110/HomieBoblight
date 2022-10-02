@@ -55,7 +55,7 @@
 
 static int channelSize = 0;
 static int ledOffset = 0;
-static int startFound = 0;
+static int mStartHeaderFound = 0;
 
 static int colorPosition=0;
 static int dynamicColorFactor= FACTOR_DEFAULT;
@@ -68,7 +68,7 @@ static uint32_t meanRed = 0;
 static uint32_t meanGreen = 0;
 static uint32_t meanBlue = 0;
 
-static uint32_t oldCRCvalue         = 0U;
+static uint32_t mOldCRCvalue         = 0U;
 static uint32_t sameColorCounter    = 0U;
 static unsigned long mTime;
 
@@ -115,7 +115,7 @@ static void calculateDynamicDim( void )
 			dynamicColorFactor -= FACTOR_DECREASE_STEP;
 		}
 	}
-	else if (crc == oldCRCvalue)
+	else if (crc == mOldCRCvalue)
 	{
 		mCountDuplicate++;	
 	    if (sameColorCounter > ALLOWED_SAME_COLOR) {
@@ -152,7 +152,7 @@ static void calculateDynamicDim( void )
 	}
 
 	/* remember the CRC value for the next cycle */
-	oldCRCvalue = crc;
+	mOldCRCvalue = crc;
 }
 
 static int readDirectWS2812cmd(char *textbuffer)
@@ -167,14 +167,17 @@ static int readDirectWS2812cmd(char *textbuffer)
 			/** Handle Frame beginning */
 			if (textbuffer[i] == 'A' && textbuffer[i+1] == 'd' && textbuffer[i+2] == 'a')
 			{
+				/* Found a new Header -> visualize the last one */
 				calculateDynamicDim();
 				channelSize = textbuffer[i+3] * 256 + textbuffer[i+4];
+				/* jump to the first byte after the header "Ada" */
 				i=i+5;
 				ledOffset=0;
+				/* red is stored in the first byte */
 				colorPosition=COLOR_RED;
-				startFound=TRUE;
+				mStartHeaderFound=TRUE;
 			}
-			else if (startFound == TRUE)
+			else if (TRUE == mStartHeaderFound)
 			{
 				/* Update the LED information */
 				if (ledOffset < LEDSTRIPE_FRAMEBUFFER_SIZE)
