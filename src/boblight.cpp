@@ -54,7 +54,7 @@
  * LOCAL VARIABLES for this module
  ******************************************************************************/
 
-static int channelSize = 0;
+static int mChannelSize = -1;
 static int ledOffset = 0;
 static int mStartHeaderFound = 0;
 
@@ -168,7 +168,6 @@ static int readDirectWS2812cmd(char *textbuffer)
 	Serial.flush();
 	if(length > 0)
 	{
-		mCountRecevied++;
 		for(i=0; i < length; i++)
 		{
 			/** Handle Frame beginning */
@@ -183,19 +182,22 @@ static int readDirectWS2812cmd(char *textbuffer)
 				channelSizeLB = textbuffer[i+4];
 				/* Found a new Header -> visualize the last one */
 				if (ledOffset > 0) {
+					if (mChannelSize != ledOffset) {
+						mCountSplit++;
+					} else {
+						mCountRecevied++;
+					}
 					calculateDynamicDim();
 				}
 
-				channelSize = /* length high byte */channelSizeHB * 256 + /* length low byte */ channelSizeLB;
+				mChannelSize = /* length high byte */channelSizeHB * 256 + /* length low byte */ channelSizeLB;
 				/* complete telegram does not fit into buffer */
-				if ((length-i) < channelSize) {
-					mCountSplit++;
-				}
+				// if ((length-i) < channelSize) 
 
 				/* verify the CRC in the header */
 				if(checkByte == (channelSizeHB ^ channelSizeLB ^ 0x55)){
 					/* jump to the first byte after the header "Ada" */
-					i=i+6;
+					i=i+5;
 					ledOffset=0;
 					/* red is stored in the first byte */
 					colorPosition=COLOR_RED;
