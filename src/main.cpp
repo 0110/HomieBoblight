@@ -25,9 +25,15 @@
 
 #define HOMIE_FIRMWARE_VERSION "1.2.0"
 
-#define HOMIE_AMBIENT "ambient"
 
 #define WORKING_INTERVAL  50 /* ms */
+
+/* Homie */
+#define HOMIE_AMBIENT                     "ambient"
+#define NODE_STATISTIC_COUNT_RECEVIED     "received"
+#define NODE_STATISTIC_COUNT_DUPLICATE    "duplicate"
+#define NODE_STATISTIC_COUNT_VALID        "valid"
+#define NODE_STATISTIC_COUNT_SUPERBRIGHT  "superbright"
 
 /******************************************************************************
  *                                     MACROS
@@ -46,14 +52,19 @@
 ******************************************************************************/
 HomieNode mNodeLed("led", "Light", "led");
 HomieNode mNodeTVsource("control", "USB control enabled", "switch");
+HomieNode mNodeStatistic("statistic", "Boblight Statistics", "statistic");
 
 HomieSetting<bool> mSettingLogging("debug", "MQTT topic with debug logs");
-
 
 unsigned long mLastAction = 0;
 bool mConfigured = false;
 bool mConnected = false;
 bool mSerialInput = true; /**< Serial control via USB UART */
+
+static long mCountRecevied    = getCountRecevied();
+static long mCountDuplicate   = getCountDuplicate();
+static long mCountValid       = getCountValid();
+static long mCountSuperBright = getCountSuperBright();
 
 /******************************************************************************
  *                            LOCAL FUNCTIONS
@@ -85,6 +96,35 @@ void onHomieEvent(const HomieEvent &event)
 }
 
 void loopHandler() {
+
+  if (aliveWasRead()) {
+    /* Update all statistics about received Boblight communication */
+    if (mCountRecevied    != getCountRecevied())
+    {
+      mCountRecevied    = getCountRecevied();
+      mNodeStatistic.setProperty(NODE_STATISTIC_COUNT_RECEVIED)
+                      .send(String(mCountRecevied));
+    }
+
+    if (mCountDuplicate   != getCountDuplicate()) {
+      mCountDuplicate   = getCountDuplicate();
+      mNodeStatistic.setProperty(NODE_STATISTIC_COUNT_DUPLICATE)
+                      .send(String(mCountDuplicate));
+    }
+
+    if (mCountValid       != getCountValid()) {
+      mCountValid       = getCountValid();
+      mNodeStatistic.setProperty(NODE_STATISTIC_COUNT_VALID)
+                      .send(String(mCountValid));
+    }
+
+    if (mCountSuperBright != getCountSuperBright()) {
+      mCountSuperBright = getCountSuperBright();
+      mNodeStatistic.setProperty(NODE_STATISTIC_COUNT_SUPERBRIGHT)
+                      .send(String(mCountSuperBright));
+    }
+  }
+
   // Feed the dog -> ESP stay alive
   ESP.wdtFeed();
 }
@@ -151,6 +191,18 @@ void setup() {
   mNodeLed.advertise(HOMIE_AMBIENT).setName("RGBType")
                             .setDatatype("color").settable(allLedsHandler);
 
+  mNodeStatistic.advertise(NODE_STATISTIC_COUNT_RECEVIED).
+                  setName(NODE_STATISTIC_COUNT_RECEVIED).
+                  setDatatype("Integer");
+  mNodeStatistic.advertise(NODE_STATISTIC_COUNT_DUPLICATE).
+                  setName(NODE_STATISTIC_COUNT_DUPLICATE).
+                  setDatatype("Integer");
+  mNodeStatistic.advertise(NODE_STATISTIC_COUNT_VALID).
+                  setName(NODE_STATISTIC_COUNT_VALID).
+                  setDatatype("Integer");
+  mNodeStatistic.advertise(NODE_STATISTIC_COUNT_SUPERBRIGHT).
+                  setName(NODE_STATISTIC_COUNT_SUPERBRIGHT).
+                  setDatatype("Integer");
 
   mConfigured = Homie.isConfigured();
   if (!mConfigured) {
