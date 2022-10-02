@@ -61,10 +61,10 @@ bool mConfigured = false;
 bool mConnected = false;
 bool mSerialInput = true; /**< Serial control via USB UART */
 
-static long mCountRecevied    = getCountRecevied();
-static long mCountDuplicate   = getCountDuplicate();
-static long mCountValid       = getCountValid();
-static long mCountSuperBright = getCountSuperBright();
+static long mCountRecevied    = -1;
+static long mCountDuplicate   = -1;
+static long mCountValid       = -1;
+static long mCountSuperBright = -1;
 
 /******************************************************************************
  *                            LOCAL FUNCTIONS
@@ -76,6 +76,7 @@ void onHomieEvent(const HomieEvent &event)
   {
   case HomieEventType::WIFI_CONNECTED:
     mConnected = true;
+    Serial.println("Wifi Connected");
     break;
   case HomieEventType::WIFI_DISCONNECTED:
     mConnected = false;
@@ -83,6 +84,7 @@ void onHomieEvent(const HomieEvent &event)
     Serial << "No Wifi" << endl;
     break;
   case HomieEventType::MQTT_READY:
+    Serial.println("MQTT found");
     mqttSetAlive();
     if (mSerialInput) {
       mNodeTVsource.setProperty("value").send("ON");
@@ -210,7 +212,9 @@ void setup() {
     Serial.flush();
   } else {
     ledstripe_init(D1 /* GPIO5 */);
-    boblight_init(); 
+    boblight_init();
+    Serial.println("Init done");
+    Serial.flush();
   }
 }
 
