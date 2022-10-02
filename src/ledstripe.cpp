@@ -53,6 +53,7 @@ void ledstripe_toggle(uint8_t red, uint8_t green, uint8_t blue) {
 
 void ledstrip_fill(uint8_t r, uint8_t g, uint8_t b) {
     pPixels->fill(pPixels->Color(r,g,b));
+    pPixels->show();   // make sure it is visible
 }
 
 void ledstrip_status(uint8_t r, uint8_t g, uint8_t b) {

@@ -23,7 +23,7 @@
 ******************************************************************************/
 #define HOMIE_FIRMWARE_NAME "Boblight"
 
-#define HOMIE_FIRMWARE_VERSION "1.4.0"
+#define HOMIE_FIRMWARE_VERSION "1.5.0"
 
 
 #define WORKING_INTERVAL  50 /* ms */
@@ -35,6 +35,8 @@
 #define NODE_STATISTIC_COUNT_VALID        "valid"
 #define NODE_STATISTIC_COUNT_SUPERBRIGHT  "superbright"
 #define NODE_STATISTIC_COUNT_PINGS        "adaPings"
+#define NODE_STATISTIC_COUNT_SPLIT        "split"
+#define NODE_STATISTIC_COUNT_CRC_ERR      "crcErr"
 
 /******************************************************************************
  *                                     MACROS
@@ -66,7 +68,9 @@ static long mCountRecevied    = -1;
 static long mCountDuplicate   = -1;
 static long mCountValid       = -1;
 static long mCountSuperBright = -1;
-static long mCountPings = -1;
+static long mCountPings       = -1;
+static long mCountSplit       = -1;
+static long mCountErrorCRC    = -1;
 
 /******************************************************************************
  *                            LOCAL FUNCTIONS
@@ -128,6 +132,19 @@ void loopHandler() {
                       .send(String(mCountSuperBright));
     }
 
+    if (mCountErrorCRC != getCountErrorCRC()) {
+      mCountErrorCRC = getCountErrorCRC();
+      mNodeStatistic.setProperty(NODE_STATISTIC_COUNT_CRC_ERR)
+                      .send(String(mCountErrorCRC));
+
+    }
+    
+    if (mCountSplit != getCountSplit()) {
+      mCountSplit = getCountSplit();
+      mNodeStatistic.setProperty(NODE_STATISTIC_COUNT_SPLIT)
+                      .send(String(mCountSplit));
+
+    }
 
     if (mCountPings != getCountPings()) {
       mCountPings = getCountPings();
@@ -219,6 +236,12 @@ void setup() {
   mNodeStatistic.advertise(NODE_STATISTIC_COUNT_PINGS).
                   setName(NODE_STATISTIC_COUNT_PINGS).
                   setDatatype("Integer");
+  mNodeStatistic.advertise(NODE_STATISTIC_COUNT_SPLIT).
+                  setName(NODE_STATISTIC_COUNT_SPLIT).
+                  setDatatype("Integer");
+  mNodeStatistic.advertise(NODE_STATISTIC_COUNT_CRC_ERR).
+                  setName(NODE_STATISTIC_COUNT_CRC_ERR).
+                  setDatatype("Integer");
 
   ledstripe_init(D1 /* GPIO5 */);
   mConfigured = Homie.isConfigured();
@@ -236,17 +259,17 @@ void setup() {
 void loop() {
   Homie.loop();
   /* Update the LEDs */
-  if ( ((millis() - mLastAction) >= (WORKING_INTERVAL)) ) {
-    if (mConfigured) {
-      if (mSerialInput) {
-        if (boblight_loop()) {
-          ledstripe_update();
-        }
-      } else {
-        /* Color was already set in allLedsHandler function */
+  if (mConfigured) {
+    if (mSerialInput) {
+      if (boblight_loop()) {
+        ledstripe_update();
+        ledstripe_show();
       }
-      ledstripe_show();
     } else {
+      /* Color was already set in allLedsHandler function */
+    }
+  } else {
+    if ( ((millis() - mLastAction) >= (WORKING_INTERVAL)) ) {
       ledstripe_toggle(60, 0, 0); /* Red indicates not configured */
     }
     mLastAction = millis();

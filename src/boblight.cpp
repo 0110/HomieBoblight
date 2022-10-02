@@ -78,6 +78,8 @@ static uint32_t mCountDuplicate 	= 0U;
 static uint32_t mCountValid			= 0U;
 static uint32_t mCountSuperBright	= 0U;
 static uint32_t mCountPings			= 0U;
+static uint32_t mCountSplit			= 0U;
+static uint32_t mCountErrorCRC		= 0U;
 
 static char textbuffer[TEXTLINE_MAX_LENGTH];
 
@@ -161,6 +163,7 @@ static int readDirectWS2812cmd(char *textbuffer)
 {
 	int i=0;
 	int length = Serial.read(textbuffer, TEXTLINE_MAX_LENGTH);
+	int checkByte, channelSizeHB, channelSizeLB;
 	Serial.printf("read:%d %x\r\n",length, textbuffer[0]);
 	Serial.flush();
 	if(length > 0)
@@ -175,21 +178,32 @@ static int readDirectWS2812cmd(char *textbuffer)
 				&& /* skip Header at the end */
 				((i+6) < length))
 			{
+				checkByte = textbuffer[i+5];
+				channelSizeHB = textbuffer[i+3];
+				channelSizeLB = textbuffer[i+4];
 				/* Found a new Header -> visualize the last one */
 				if (ledOffset > 0) {
 					calculateDynamicDim();
 				}
 
-				channelSize = textbuffer[i+3] * 256 + textbuffer[i+4];
-				Serial.printf("len:%d crc:%x\r\n",channelSize, textbuffer[i+5]);
-				Serial.flush();
+				channelSize = /* length high byte */channelSizeHB * 256 + /* length low byte */ channelSizeLB;
+				/* complete telegram does not fit into buffer */
+				if ((length-i) < channelSize) {
+					mCountSplit++;
+				}
 
-				/* jump to the first byte after the header "Ada" */
-				i=i+6;
-				ledOffset=0;
-				/* red is stored in the first byte */
-				colorPosition=COLOR_RED;
-				mStartHeaderFound=TRUE;
+				/* verify the CRC in the header */
+				if(checkByte == (channelSizeHB ^ channelSizeLB ^ 0x55)){
+					/* jump to the first byte after the header "Ada" */
+					i=i+6;
+					ledOffset=0;
+					/* red is stored in the first byte */
+					colorPosition=COLOR_RED;
+					mStartHeaderFound=TRUE;
+				} else {
+					mStartHeaderFound=FALSE;
+					mCountErrorCRC++;
+				}
 			}
 			else if (TRUE == mStartHeaderFound)
 			{
@@ -292,4 +306,23 @@ long getCountValid(void) { return mCountValid; }
  */
 long getCountSuperBright(void) { return mCountSuperBright; }
 
+/**
+ * @brief Get the Count Pings to host (via UART)
+ * 
+ * @return long 
+ */
 long getCountPings(void) { return mCountPings; }
+
+/**
+ * @brief Get the Count Split telegrams into several receive buffer
+ * 
+ * @return long 
+ */
+long getCountSplit(void) { return mCountSplit; }
+
+/**
+ * @brief Get the Count wrong CRCs
+ * 
+ * @return long 
+ */
+long getCountErrorCRC(void) { return mCountErrorCRC; }
