@@ -161,19 +161,31 @@ static int readDirectWS2812cmd(char *textbuffer)
 {
 	int i=0;
 	int length = Serial.read(textbuffer, TEXTLINE_MAX_LENGTH);
+	Serial.printf("read:%d %x\r\n",length, textbuffer[0]);
+	Serial.flush();
 	if(length > 0)
 	{
 		mCountRecevied++;
 		for(i=0; i < length; i++)
 		{
 			/** Handle Frame beginning */
-			if (textbuffer[i] == 'A' && textbuffer[i+1] == 'd' && textbuffer[i+2] == 'a')
+			if (((textbuffer[i] == 'A' && 
+				textbuffer[i+1] == 'd' && 
+				textbuffer[i+2] == 'a'))
+				&& /* skip Header at the end */
+				((i+6) < length))
 			{
 				/* Found a new Header -> visualize the last one */
-				calculateDynamicDim();
+				if (ledOffset > 0) {
+					calculateDynamicDim();
+				}
+
 				channelSize = textbuffer[i+3] * 256 + textbuffer[i+4];
+				Serial.printf("len:%d crc:%x\r\n",channelSize, textbuffer[i+5]);
+				Serial.flush();
+
 				/* jump to the first byte after the header "Ada" */
-				i=i+5;
+				i=i+6;
 				ledOffset=0;
 				/* red is stored in the first byte */
 				colorPosition=COLOR_RED;
@@ -197,11 +209,12 @@ static int readDirectWS2812cmd(char *textbuffer)
 					case COLOR_BLUE:
 						ledstripe_framebuffer[ledOffset].blue = 	(uint8_t) ((textbuffer[i] * dynamicColorFactor) / FACTOR_DEFAULT);
 						ledstripe_inputbuffer[ledOffset].blue =      (uint8_t) (textbuffer[i]);
-						/* Reset for the next LED */
+						/* Reset for the next LED, as incremented at the end, use state before red LED */
 						colorPosition = COLOR_RESET;
 						ledOffset++;
 						break;
 					}
+					/* always incremet index */
 					colorPosition++;
 				}
 			}
@@ -220,8 +233,6 @@ static int readDirectWS2812cmd(char *textbuffer)
 
 void boblight_init(void)
 {
-	/* Say hello to the host */
-	Serial.print("Ada\n");
 	mTime = millis();
 	memset(textbuffer, 0, TEXTLINE_MAX_LENGTH);
 }
@@ -235,7 +246,9 @@ void boblight_init(void)
 int boblight_loop(void)
 {
 	//read serial input
-	if (Serial.available() > 0) {
+	int available = Serial.available();
+	if ((available > 0) && (available < TEXTLINE_MAX_LENGTH)) {
+		mTime = millis(); /* reset time, once something was received */
 		readDirectWS2812cmd(textbuffer);
 		return TRUE;
 	} else {

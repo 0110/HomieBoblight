@@ -86,7 +86,7 @@ void onHomieEvent(const HomieEvent &event)
     Serial << "No Wifi" << endl;
     break;
   case HomieEventType::MQTT_READY:
-    ledstrip_status(60, 0, 0);
+    ledstrip_status(5, 0, 0);
     mqttSetAlive();
     if (mSerialInput) {
       mNodeTVsource.setProperty("value").send("ON");
@@ -175,6 +175,8 @@ bool switchHandler(const HomieRange& range, const String& value) {
     mSerialInput = true;
     mNodeTVsource.setProperty("value").send(value);
     mqttlog(LOG_LEVEL_DEBUG, String("Serial input activated"));
+  } else {
+    return false;
   }
   return true;
 }
