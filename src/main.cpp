@@ -81,7 +81,7 @@ void onHomieEvent(const HomieEvent &event)
   switch (event.type)
   {
   case HomieEventType::WIFI_CONNECTED:
-    ledstrip_status(0, 0, 128);
+    ledstrip_status(STATIC_COLOR_WIFI);
     mConnected = true;
     break;
   case HomieEventType::WIFI_DISCONNECTED:
@@ -90,7 +90,7 @@ void onHomieEvent(const HomieEvent &event)
     Serial << "No Wifi" << endl;
     break;
   case HomieEventType::MQTT_READY:
-    ledstrip_status(5, 0, 0);
+    ledstrip_status(STATIC_COLOR_MQTT);
     mqttSetAlive();
     if (mSerialInput) {
       mNodeTVsource.setProperty("value").send("ON");
@@ -270,7 +270,7 @@ void loop() {
     }
   } else {
     if ( ((millis() - mLastAction) >= (WORKING_INTERVAL)) ) {
-      ledstripe_toggle(60, 0, 0); /* Red indicates not configured */
+      ledstripe_toggle(TOGGLE_COLOR_NOT_CONFIGURED); /* indicates not configured */
     }
     mLastAction = millis();
   }

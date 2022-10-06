@@ -11,6 +11,12 @@
 #include <Adafruit_NeoPixel.h>
 #include "stdint.h"
 
+#define STATIC_COLOR_INIT				0 /*red */, 20 /* green */, 0 /* blue */
+#define STATIC_COLOR_WIFI				0 /*red */, 0 /* green */, 20 /* blue */
+#define STATIC_COLOR_MQTT				5 /*red */, 0 /* green */, 0 /* blue */
+
+#define TOGGLE_COLOR_NOT_CONFIGURED		60, 0, 0
+
 #define LEDSTRIPE_COLOR_MAXVALUE  255
 
 //enter number of LEDs here!

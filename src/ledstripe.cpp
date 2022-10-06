@@ -31,7 +31,7 @@ void ledstripe_init(int pin) {
   	pPixels->begin();
   	pPixels->clear();
     for( int i = 0; i < LEDSTRIPE_TOGGLE_LENGTH; i++ ) {
-        pPixels->setPixelColor(i, pPixels->Color(0 /*red */, 120 /* green */, 0 /* blue */));
+        pPixels->setPixelColor(i, pPixels->Color(STATIC_COLOR_INIT));
     }
     pPixels->show();   // make sure it is visible
 
